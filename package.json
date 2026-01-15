@@ -1,0 +1,12 @@
+{
+  "name": "careerboost",
+  "version": "2.0.0",
+  "description": "AI-powered career document upgrade service",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["career", "resume", "ai", "document"],
+  "author": "Woosang Jo",
+  "license": "MIT"
+}

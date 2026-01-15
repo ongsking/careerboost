@@ -1,0 +1,3330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerBoost - AI 경력기술서 업그레이드</title>
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+        
+        :root {
+            /* Brutalist Tech Colors */
+            --primary: #000000;
+            --secondary: #FFFFFF;
+            --accent: #00FF41;
+            --accent-secondary: #FF006E;
+            --accent-blue: #00D9FF;
+            --border: #000000;
+            --bg-gray: #F0F0F0;
+            --text-primary: #000000;
+            --text-secondary: #505050;
+            --shadow: rgba(0, 0, 0, 0.15);
+            --glow: rgba(0, 255, 65, 0.5);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: var(--secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Brutalist Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.03;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+        
+        /* Header */
+        header {
+            border-bottom: 6px solid var(--primary);
+            background: var(--secondary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 6px 0 var(--primary);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+        
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            border: 3px solid var(--primary);
+            padding: 6px 12px;
+            background: var(--accent);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logo:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--primary);
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .auth-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border: 3px solid var(--primary);
+            background: var(--secondary);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        
+        .auth-btn:hover:not(:disabled) {
+            background: var(--accent);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--primary);
+        }
+        
+        .auth-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .auth-btn.primary {
+            background: var(--primary);
+            color: var(--secondary);
+        }
+        
+        .auth-btn.primary:hover:not(:disabled) {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            border: 3px solid var(--primary);
+            padding: 10px 16px;
+            background: var(--bg-gray);
+        }
+        
+        .logout-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border: 2px solid var(--primary);
+            background: var(--secondary);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: var(--accent-secondary);
+            color: var(--secondary);
+        }
+        
+        .usage-indicator {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            border: 4px solid var(--primary);
+            padding: 8px 16px;
+            background: var(--bg-gray);
+            position: relative;
+            cursor: help;
+        }
+        
+        .usage-indicator::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            background: var(--primary);
+            color: var(--secondary);
+            padding: 10px 14px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            border: 3px solid var(--primary);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .usage-indicator::after {
+            content: '';
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 20px;
+            border: 4px solid transparent;
+            border-bottom-color: var(--primary);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+        
+        .usage-indicator:hover::before,
+        .usage-indicator:hover::after {
+            opacity: 1;
+        }
+        
+        .usage-dot {
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border: 3px solid var(--primary);
+            transition: all 0.2s;
+        }
+        
+        .usage-dot.used {
+            background: var(--secondary);
+            opacity: 0.3;
+        }
+        
+        /* Hero Carousel */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-carousel-container {
+            position: relative;
+            width: 100%;
+            min-height: 400px;
+        }
+        
+        .hero-carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .hero-slide {
+            min-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+        }
+        
+        .hero-slide h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -4px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            border: 8px solid var(--primary);
+            padding: 40px;
+            background: var(--accent);
+            display: inline-block;
+            transform: skew(-2deg);
+            box-shadow: 12px 12px 0 var(--primary);
+        }
+        
+        .hero-slide p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 40px auto 0;
+            font-family: 'Space Mono', monospace;
+            border-left: 6px solid var(--primary);
+            padding-left: 20px;
+            font-weight: 700;
+        }
+        
+        .hero-slide-image {
+            width: 100%;
+            max-width: 1200px;
+            height: 600px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 48px;
+            color: var(--text-secondary);
+        }
+        
+        .hero-slide-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .hero-indicators {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .hero-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--secondary);
+            border: 4px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .hero-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--glow);
+        }
+        
+        .hero-dot:hover {
+            background: var(--accent);
+        }
+        
+        /* Step Container */
+        .step-container {
+            display: none;
+            padding: 60px 0;
+        }
+        
+        .step-container.active {
+            display: block;
+        }
+        
+        .step-header {
+            margin-bottom: 48px;
+        }
+        
+        .step-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        
+        .step-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+            border-left: 10px solid var(--accent);
+            padding-left: 24px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+            padding: 16px 24px;
+            margin-left: -40px;
+            padding-left: 64px;
+        }
+        
+        .step-description {
+            font-size: 18px;
+            color: var(--text-secondary);
+            border-left: 8px solid var(--primary);
+            padding-left: 24px;
+            margin-left: 8px;
+        }
+        
+        /* Template Cards */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .template-card {
+            border: 5px solid var(--primary);
+            background: var(--secondary);
+            padding: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .template-card:hover {
+            transform: translate(-6px, -6px);
+            box-shadow: 10px 10px 0 var(--primary);
+        }
+        
+        .template-card.selected {
+            background: var(--accent);
+            transform: translate(-6px, -6px);
+            box-shadow: 10px 10px 0 var(--primary), 0 0 30px var(--glow);
+            border-width: 6px;
+        }
+        
+        .template-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .template-preview {
+            width: 100%;
+            height: 200px;
+            border: 3px solid var(--primary);
+            margin-bottom: 20px;
+            background: var(--bg-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 48px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .template-preview-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        /* 미니멀 프로페셔널 템플릿만 이미지 항상 표시 */
+        .template-card[data-template="minimal"] .template-preview-image {
+            opacity: 1;
+        }
+        
+        /* 미니멀 프로페셔널 템플릿 아이콘 숨김 */
+        .template-card[data-template="minimal"] .template-preview-icon {
+            opacity: 0;
+        }
+        
+        /* 다른 템플릿들은 호버 시에만 이미지 표시 (기본 동작) */
+        .template-card:hover .template-preview-image {
+            opacity: 1;
+        }
+        
+        .template-preview-icon {
+            position: relative;
+            z-index: 1;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+        
+        .template-card:hover .template-preview-icon {
+            opacity: 0;
+        }
+        
+        .preview-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--secondary);
+            border: 3px solid var(--primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            z-index: 2;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        
+        /* 미니멀 템플릿만 미리보기 버튼 항상 표시 */
+        .template-card[data-template="minimal"] .preview-btn {
+            opacity: 1;
+        }
+        
+        .template-card:hover .preview-btn {
+            opacity: 1;
+        }
+        
+        .preview-btn:hover {
+            background: var(--accent);
+            color: var(--primary);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--primary);
+        }
+        
+        .template-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        
+        .template-badge {
+            display: inline-block;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border: 2px solid var(--primary);
+            background: var(--accent-secondary);
+            margin-top: 8px;
+        }
+        
+        .check-icon {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border: 3px solid var(--primary);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-size: 20px;
+        }
+        
+        .template-card.selected .check-icon {
+            display: flex;
+        }
+        
+        /* Input Tabs */
+        .input-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 32px;
+            border: 4px solid var(--primary);
+        }
+        
+        .input-tab {
+            flex: 1;
+            padding: 16px 32px;
+            background: var(--bg-gray);
+            border: none;
+            border-right: 4px solid var(--primary);
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+        
+        .input-tab:last-child {
+            border-right: none;
+        }
+        
+        .input-tab.active {
+            background: var(--accent);
+        }
+        
+        .input-tab:hover:not(.active) {
+            background: var(--secondary);
+        }
+        
+        /* Input Area */
+        .input-section {
+            display: none;
+        }
+        
+        .input-section.active {
+            display: block;
+        }
+        
+        /* Profile Photo Upload */
+        .profile-upload-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            border: 4px solid var(--primary);
+            background: var(--bg-gray);
+        }
+        
+        .profile-upload-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .section-hint {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border: 2px solid var(--text-secondary);
+        }
+        
+        .profile-upload-container {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        
+        .profile-preview {
+            width: 180px;
+            height: 240px;
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .profile-placeholder {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .profile-placeholder span {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .profile-placeholder p {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        #profileImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-upload-controls {
+            flex: 1;
+        }
+        
+        .upload-photo-btn,
+        .remove-photo-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 12px 24px;
+            border: 3px solid var(--primary);
+            background: var(--primary);
+            color: var(--secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .upload-photo-btn:hover {
+            background: var(--accent);
+            color: var(--primary);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--primary);
+        }
+        
+        .remove-photo-btn {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+        
+        .remove-photo-btn:hover {
+            background: var(--accent-secondary);
+            color: var(--secondary);
+            border-color: var(--accent-secondary);
+        }
+        
+        .photo-requirements {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--text-secondary);
+            padding-left: 16px;
+            margin-top: 16px;
+        }
+        
+        .photo-requirements p {
+            margin: 4px 0;
+        }
+        
+        .input-helpers {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .helper-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border: 3px solid var(--primary);
+            background: var(--secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        
+        .helper-btn:hover {
+            background: var(--accent);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--primary);
+        }
+        
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        #careerInput {
+            width: 100%;
+            min-height: 400px;
+            padding: 24px;
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            line-height: 1.8;
+            resize: vertical;
+        }
+        
+        #careerInput:focus {
+            outline: none;
+            background: var(--bg-gray);
+        }
+        
+        .char-counter {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-align: right;
+        }
+        
+        .char-counter.warning {
+            color: #FF6B00;
+        }
+        
+        .char-counter.error {
+            color: #FF0000;
+        }
+        
+        /* File Upload */
+        .file-upload-zone {
+            border: 4px dashed var(--primary);
+            padding: 60px 40px;
+            text-align: center;
+            background: var(--bg-gray);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .file-upload-zone.dragover {
+            background: var(--accent);
+            border-style: solid;
+        }
+        
+        .file-upload-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .file-upload-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .file-upload-hint {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .file-info {
+            display: none;
+            padding: 20px;
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+            margin-top: 16px;
+        }
+        
+        .file-info.show {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-name {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+        }
+        
+        .file-remove {
+            padding: 8px 16px;
+            border: 3px solid var(--primary);
+            background: var(--secondary);
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .file-remove:hover {
+            background: #FF0000;
+            color: var(--secondary);
+        }
+        
+        /* Guide */
+        .input-guide {
+            margin-top: 24px;
+            border: 4px solid var(--primary);
+            background: var(--bg-gray);
+        }
+        
+        .guide-header {
+            padding: 16px 24px;
+            background: var(--primary);
+            color: var(--secondary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .guide-content {
+            display: none;
+            padding: 24px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .guide-content.show {
+            display: block;
+        }
+        
+        .guide-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .guide-content li {
+            padding-left: 24px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        
+        .guide-content li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+        
+        /* Processing */
+        .processing-container {
+            text-align: center;
+            padding: 80px 40px;
+        }
+        
+        .spinner {
+            width: 120px;
+            height: 120px;
+            border: 8px solid var(--bg-gray);
+            border-top: 8px solid var(--primary);
+            border-radius: 0;
+            margin: 0 auto 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .processing-steps {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .processing-step {
+            padding: 16px 24px;
+            border: 3px solid var(--primary);
+            background: var(--bg-gray);
+            margin-bottom: 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            opacity: 0.4;
+            transition: all 0.3s;
+        }
+        
+        .processing-step.active {
+            opacity: 1;
+            background: var(--accent);
+            border-width: 4px;
+            transform: translate(-4px, -4px);
+            box-shadow: 6px 6px 0 var(--primary);
+        }
+        
+        /* Results */
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .stat-card {
+            border: 5px solid var(--primary);
+            padding: 32px;
+            text-align: center;
+            background: var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--accent);
+        }
+        
+        .stat-value {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-family: 'Space Mono', monospace;
+            text-shadow: 3px 3px 0 var(--accent);
+        }
+        
+        .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Result Tabs */
+        .result-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 32px;
+            border: 4px solid var(--primary);
+        }
+        
+        .result-tab {
+            flex: 1;
+            padding: 16px 32px;
+            background: var(--bg-gray);
+            border: none;
+            border-right: 4px solid var(--primary);
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .result-tab:last-child {
+            border-right: none;
+        }
+        
+        .result-tab.active {
+            background: var(--accent);
+        }
+        
+        .result-tab:hover:not(.active) {
+            background: var(--secondary);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Preview */
+        .preview-container {
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+            padding: 48px;
+            min-height: 600px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        
+        /* Editor */
+        .editor-container {
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            gap: 0;
+            border-bottom: 4px solid var(--primary);
+        }
+        
+        .editor-btn {
+            padding: 12px 24px;
+            border: none;
+            border-right: 3px solid var(--primary);
+            background: var(--bg-gray);
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        
+        .editor-btn:hover {
+            background: var(--accent);
+        }
+        
+        .editor-btn.primary {
+            background: var(--primary);
+            color: var(--secondary);
+            border-right: none;
+        }
+        
+        .editor-btn.primary:hover {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        
+        #textEditor {
+            width: 100%;
+            min-height: 600px;
+            padding: 32px;
+            border: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            resize: vertical;
+            background: var(--secondary);
+        }
+        
+        #textEditor:focus {
+            outline: none;
+            background: var(--bg-gray);
+        }
+        
+        /* HTML Code */
+        .code-container {
+            border: 4px solid var(--primary);
+            background: var(--primary);
+            color: var(--secondary);
+            padding: 32px;
+            max-height: 800px;
+            overflow: auto;
+        }
+        
+        .code-container pre {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Downloads */
+        .downloads-section {
+            margin-top: 48px;
+        }
+        
+        .downloads-title {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 24px;
+            border-left: 6px solid var(--primary);
+            padding-left: 16px;
+            text-transform: uppercase;
+        }
+        
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        
+        .download-card {
+            border: 5px solid var(--primary);
+            background: var(--secondary);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        
+        .download-card:hover {
+            transform: translate(-6px, -6px);
+            box-shadow: 10px 10px 0 var(--primary);
+        }
+        
+        .download-preview {
+            width: 100%;
+            height: 300px;
+            border-bottom: 4px solid var(--primary);
+            background: var(--bg-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+        }
+        
+        .download-info {
+            padding: 24px;
+        }
+        
+        .download-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .download-name {
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        
+        .download-price {
+            font-family: 'Space Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border: 3px solid var(--primary);
+            background: var(--accent);
+        }
+        
+        .download-price.free {
+            background: var(--accent-secondary);
+        }
+        
+        .download-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .download-btn {
+            width: 100%;
+            padding: 16px;
+            border: 4px solid var(--primary);
+            background: var(--primary);
+            color: var(--secondary);
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+        
+        .download-btn:hover {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        
+        .download-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 48px;
+            padding-top: 48px;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .btn {
+            padding: 16px 48px;
+            border: 5px solid var(--primary);
+            background: var(--secondary);
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+        
+        .btn:hover {
+            transform: translate(-6px, -6px);
+            box-shadow: 10px 10px 0 var(--primary);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: var(--secondary);
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent);
+            color: var(--primary);
+            box-shadow: 10px 10px 0 var(--primary), 0 0 20px var(--glow);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-gray);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--secondary);
+            border: 6px solid var(--primary);
+            max-width: 1100px;
+            width: 100%;
+            padding: 48px;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: var(--accent);
+            transform: rotate(90deg);
+        }
+        
+        .modal-preview {
+            width: 100%;
+            max-height: 85vh;
+            overflow: auto;
+        }
+        
+        .modal-preview-image {
+            width: 100%;
+            height: auto;
+            border: 5px solid var(--primary);
+            display: block;
+        }
+        
+        .modal-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+        
+        .modal-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 32px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .disabled-btn-wrapper {
+            position: relative;
+            cursor: help;
+        }
+        
+        .disabled-btn-wrapper::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            background: var(--primary);
+            color: var(--secondary);
+            padding: 10px 14px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            border: 3px solid var(--primary);
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .disabled-btn-wrapper::after {
+            content: '';
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 20px;
+            border: 4px solid transparent;
+            border-bottom-color: var(--primary);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+        
+        .disabled-btn-wrapper:hover::before,
+        .disabled-btn-wrapper:hover::after {
+            opacity: 1;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 16px;
+            border: 4px solid var(--primary);
+            background: var(--primary);
+            color: var(--secondary);
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .modal-btn:hover:not(:disabled) {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        
+        /* Login Form */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .form-input {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            padding: 12px 16px;
+            border: 4px solid var(--primary);
+            background: var(--secondary);
+            outline: none;
+        }
+        
+        .form-input:focus {
+            background: var(--bg-gray);
+            box-shadow: inset 4px 4px 0 rgba(0,0,0,0.1);
+        }
+        
+        .form-error {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            color: var(--accent-secondary);
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        
+        .form-info {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            border-left: 3px solid var(--text-secondary);
+            padding-left: 12px;
+        }
+        
+        /* Error Message */
+        .error-message {
+            display: none;
+            padding: 16px 24px;
+            border: 4px solid #FF0000;
+            background: var(--secondary);
+            margin-top: 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: #FF0000;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        /* Footer */
+        footer {
+            margin-top: 120px;
+            padding: 40px 0;
+            border-top: 4px solid var(--primary);
+            text-align: center;
+        }
+        
+        .footer-content {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        
+        .footer-logo {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            
+            .header-content {
+                flex-wrap: wrap;
+            }
+            
+            .header-right {
+                flex-direction: column;
+                width: 100%;
+                gap: 8px;
+                margin-top: 12px;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: stretch;
+            }
+            
+            .auth-btn {
+                flex: 1;
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: space-between;
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+            
+            .usage-indicator {
+                width: 100%;
+                justify-content: center;
+                padding: 8px 12px;
+            }
+            
+            .usage-indicator::before,
+            .disabled-btn-wrapper::before {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+            }
+            
+            .usage-indicator::after,
+            .disabled-btn-wrapper::after {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+            }
+            
+            .hero-slide h1 {
+                font-size: 48px;
+                padding: 24px;
+            }
+            
+            .hero-slide-image {
+                height: 350px;
+            }
+            
+            .template-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .step-title {
+                margin-left: 0;
+                padding-left: 24px;
+            }
+            
+            .modal-content {
+                padding: 32px 24px;
+            }
+            
+            .modal-title {
+                font-size: 24px;
+            }
+            
+            .profile-upload-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .profile-preview {
+                width: 150px;
+                height: 200px;
+            }
+            
+            .profile-upload-controls {
+                width: 100%;
+            }
+            
+            .upload-photo-btn,
+            .remove-photo-btn {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" onclick="resetApp()">CareerBoost</div>
+                <div class="header-right">
+                    <!-- 로그인 전 -->
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="auth-btn primary" onclick="showLoginModal()">로그인</button>
+                    </div>
+                    
+                    <!-- 로그인 후 -->
+                    <div class="user-info" id="userInfo" style="display: none;">
+                        <span id="username">woosang87</span>
+                        <button class="logout-btn" onclick="logout()">로그아웃</button>
+                    </div>
+                    
+                    <!-- 사용 횟수 (로그인 시에만 표시) -->
+                    <div class="usage-indicator" 
+                         id="usageIndicator" 
+                         style="display: none;" 
+                         data-tooltip="오늘의 AI 업그레이드 무료 사용 가능 횟수"
+                         title="오늘의 AI 업그레이드 무료 사용 가능 횟수">
+                        <div class="usage-dot" id="dot1"></div>
+                        <div class="usage-dot" id="dot2"></div>
+                        <div class="usage-dot" id="dot3"></div>
+                        <span id="usageText">3/3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Step 1: Template Selection -->
+        <div class="step-container active" id="step1">
+            <!-- Hero Carousel - Step 1에서만 표시 -->
+            <section class="hero">
+                <div class="hero-carousel-container">
+                    <div class="hero-carousel-track" id="heroCarouselTrack">
+                        <!-- Slide 1: Original Hero Content -->
+                        <div class="hero-slide">
+                            <h1>AI 경력기술서<br>업그레이드</h1>
+                            <p>평범한 경력을 전문적인 포트폴리오로 변환합니다</p>
+                        </div>
+                        
+                        <!-- Slide 2: Before/After 이미지 -->
+                        <div class="hero-slide">
+                            <div class="hero-slide-image">
+                                <img src="images/before-after.png" alt="Before/After 비교" style="max-width: 100%; height: auto;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hero-indicators">
+                    <div class="hero-dot active" onclick="goToHeroSlide(0)"></div>
+                    <div class="hero-dot" onclick="goToHeroSlide(1)"></div>
+                </div>
+            </section>
+            
+            <div class="step-header">
+                <div class="step-number">STEP 01</div>
+                <h2 class="step-title">템플릿 선택</h2>
+                <p class="step-description">원하는 디자인 스타일을 선택하세요</p>
+            </div>
+            
+            <div class="template-grid">
+                <div class="template-card" data-template="minimal" onclick="selectTemplate('minimal')">
+                    <div class="template-preview">
+                        <img class="template-preview-image" src="images/template-thumb.png" alt="미니멀 프로페셔널 미리보기" data-template-img="minimal">
+                        <span class="template-preview-icon">▦</span>
+                        <button class="preview-btn" onclick="showTemplatePreview('minimal', event)">미리보기</button>
+                    </div>
+                    <div class="template-name">미니멀 프로페셔널</div>
+                    <div class="check-icon">✓</div>
+                </div>
+                
+                <div class="template-card disabled" data-template="creative">
+                    <div class="template-preview">
+                        <img class="template-preview-image" src="" alt="모던 크리에이티브 미리보기" data-template-img="creative">
+                        <span class="template-preview-icon">◈</span>
+                        <button class="preview-btn" onclick="showTemplatePreview('creative', event)">미리보기</button>
+                    </div>
+                    <div class="template-name">모던 크리에이티브</div>
+                    <div class="template-badge">준비중</div>
+                </div>
+                
+                <div class="template-card disabled" data-template="formal">
+                    <div class="template-preview">
+                        <img class="template-preview-image" src="" alt="클래식 포멀 미리보기" data-template-img="formal">
+                        <span class="template-preview-icon">◉</span>
+                        <button class="preview-btn" onclick="showTemplatePreview('formal', event)">미리보기</button>
+                    </div>
+                    <div class="template-name">클래식 포멀</div>
+                    <div class="template-badge">준비중</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="goToStep(2)">다음 단계 →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Input -->
+        <div class="step-container" id="step2">
+            <div class="step-header">
+                <div class="step-number">STEP 02</div>
+                <h2 class="step-title">경력 정보 입력</h2>
+                <p class="step-description">텍스트로 직접 입력하거나 파일을 업로드하세요</p>
+            </div>
+            
+            <div class="input-tabs">
+                <button class="input-tab active" data-method="text" onclick="switchInputMethod('text')">
+                    ✍️ 텍스트 입력
+                </button>
+                <button class="input-tab" data-method="file" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                    📎 파일 업로드 (추후 지원)
+                </button>
+            </div>
+            
+            <!-- Text Input Section -->
+            <div class="input-section active" id="textInput">
+                <!-- 프로필 사진 업로드 -->
+                <div class="profile-upload-section">
+                    <div class="profile-upload-header">
+                        <span class="section-label">📷 프로필 사진 (선택)</span>
+                        <span class="section-hint">경력기술서에 포함될 사진입니다</span>
+                    </div>
+                    <div class="profile-upload-container">
+                        <div class="profile-preview" id="profilePreview">
+                            <div class="profile-placeholder">
+                                <span>👤</span>
+                                <p>사진 없음</p>
+                            </div>
+                            <img id="profileImage" style="display: none;">
+                        </div>
+                        <div class="profile-upload-controls">
+                            <button class="upload-photo-btn" onclick="document.getElementById('photoInput').click()">
+                                사진 선택
+                            </button>
+                            <button class="remove-photo-btn" id="removePhotoBtn" style="display: none;" onclick="removeProfilePhoto()">
+                                삭제
+                            </button>
+                            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/jpg" style="display: none;" onchange="handleProfilePhoto(event)">
+                            <div class="photo-requirements">
+                                <p>• 권장 크기: 300×400px (3:4 비율)</p>
+                                <p>• 지원 형식: JPG, PNG</p>
+                                <p>• 최대 용량: 5MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-helpers">
+                    <button class="helper-btn" onclick="fillExample()">📝 예시 채우기</button>
+                    <button class="helper-btn" onclick="toggleGuide()">💡 입력 가이드</button>
+                    <button class="helper-btn" onclick="clearInput()">🗑️ 전체 삭제</button>
+                </div>
+                
+                <div class="input-wrapper">
+                    <textarea id="careerInput" oninput="updateCharCount()">[개인정보]
+이름: 홍길동
+전화번호: 010-1234-5678
+이메일: honggildong@email.com
+생년월일: 1990년 5월 15일
+거주지: 서울시 성동구 옥수동
+
+[학력사항]
+[기간] 2010.03 - 2014.02
+[학교] 서울대학교 경영학과 졸업
+[학점] 3.9 / 4.5
+
+[경력사항]
+[회사명] OO전자
+[기간] 2016.03 - 2019.12
+[직책] 대리
+
+담당 업무:
+- AI 기반 피트니스 매칭 플랫폼 기획
+- 정책 및 기획 정의를 통한 개발 관리
+
+주요 성과:
+- 누적 사용자 15만명 달성
+- 누적 거래액 10억원 돌파
+- 시드 및 시리즈A 투자 유치 총 30억원
+- 월간 활성 사용자(MAU) 2만명 달성
+
+[회사명] 드라마앤컴퍼니
+[기간] 2020.01 - 2021.12
+[직책] 프로덕트 매니저
+
+담당 업무:
+- 리멤버 커리어 서비스 신규 기획
+- B2B 구독 모델 설계 및 론칭
+- 데이터 기반 서비스 개선</textarea>
+                    <div class="char-counter" id="charCounter">0 / 5,000자</div>
+                </div>
+                
+                <div class="input-guide" id="inputGuide">
+                    <div class="guide-header" onclick="toggleGuide()">
+                        <span>입력 가이드</span>
+                        <span id="guideToggle">▼</span>
+                    </div>
+                    <div class="guide-content" id="guideContent">
+                        <ul>
+                            <li>회사명, 직책, 근무 기간을 명확히 작성</li>
+                            <li>구체적인 업무 내용과 성과 포함</li>
+                            <li>정량적 지표 (사용자 수, 매출, 성장률 등) 기재</li>
+                            <li>프로젝트별로 문제-해결-성과 구조로 작성</li>
+                            <li>최소 100자, 최대 5,000자</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- File Upload Section -->
+            <div class="input-section" id="fileInput">
+                <div class="file-upload-zone" id="uploadZone" onclick="document.getElementById('fileInputEl').click()">
+                    <div class="file-upload-icon">📎</div>
+                    <div class="file-upload-text">파일을 드래그하거나 클릭하여 업로드</div>
+                    <div class="file-upload-hint">DOCX, HWP, PDF 지원 (최대 10MB)</div>
+                    <input type="file" id="fileInputEl" accept=".docx,.hwp,.pdf" style="display: none;" onchange="handleFile(event)">
+                </div>
+                
+                <div class="file-info" id="fileInfo">
+                    <div class="file-name" id="fileName"></div>
+                    <button class="file-remove" onclick="removeFile()">삭제</button>
+                </div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="goToStep(1)">← 이전</button>
+                <button class="btn btn-primary" onclick="processCareer()">🚀 AI로 업그레이드</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Processing -->
+        <div class="step-container" id="step3">
+            <div class="processing-container">
+                <div class="spinner"></div>
+                <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 40px; text-transform: uppercase;">처리 중...</h2>
+                <div class="processing-steps">
+                    <div class="processing-step" id="processStep1">01. 경력 정보를 분석하고 있습니다...</div>
+                    <div class="processing-step" id="processStep2">02. 성과를 정량화하고 있습니다...</div>
+                    <div class="processing-step" id="processStep3">03. 전문적인 문장으로 재작성하고 있습니다...</div>
+                    <div class="processing-step" id="processStep4">04. 최종 확인 중입니다...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Results -->
+        <div class="step-container" id="step4">
+            <div class="step-header">
+                <div class="step-number">STEP 04</div>
+                <h2 class="step-title">결과 확인</h2>
+                <p class="step-description">AI가 업그레이드한 경력기술서를 확인하세요</p>
+            </div>
+            
+            <div class="results-stats">
+                <div class="stat-card">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">회사 경력</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">프로젝트</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">핵심역량</div>
+                </div>
+            </div>
+            
+            <div class="result-tabs">
+                <button class="result-tab active" onclick="switchResultTab('preview')">
+                    👁️ 미리보기
+                </button>
+                <button class="result-tab" onclick="switchResultTab('editor')">
+                    ✏️ 텍스트 편집기
+                </button>
+                <button class="result-tab" onclick="switchResultTab('html')">
+                    &lt;/&gt; HTML
+                </button>
+            </div>
+            
+            <div class="tab-content active" id="previewTab">
+                <div class="preview-container">
+                    <h3 style="font-size: 32px; margin-bottom: 8px;">조우상</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 32px;">프로덕트 매니저 / 스타트업 대표</p>
+                    
+                    <h4 style="margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">핵심역량</h4>
+                    <p style="margin-bottom: 32px;">프로덕트 매니지먼트 및 빠른 실행력: 빠른 시장 검증을 위한 MVP 개발...</p>
+                    
+                    <h4 style="margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">경력</h4>
+                    <div style="margin-bottom: 24px;">
+                        <strong>더핏</strong> | 대표이사 | 2016.03 - 2019.12<br>
+                        <p style="margin-top: 12px; color: var(--text-secondary);">AI 기반 피트니스 매칭 플랫폼을 개발하여 누적 15만 사용자를 달성...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="editorTab">
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <button class="editor-btn" onclick="copyText()">📋 전체 복사</button>
+                        <button class="editor-btn" onclick="resetText()">↻ 되돌리기</button>
+                        <button class="editor-btn primary" onclick="goToStep(5)">✓ 수정 완료</button>
+                    </div>
+                    <textarea id="textEditor">조우상
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+직무
+프로덕트 매니저 / 스타트업 대표
+
+연락처
+• 이메일: example@email.com
+• 전화: 010-1234-5678
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+핵심역량
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. 프로덕트 매니지먼트 및 빠른 실행력
+빠른 시장 검증을 위한 MVP 개발 및 반복적 개선 전문...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+경력
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[더핏]
+직책: 대표이사
+기간: 2016.03 - 2019.12
+
+▸ 프로젝트: 더핏 - AI 기반 피트니스 매칭 플랫폼
+...</textarea>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="htmlTab">
+                <div class="code-container">
+                    <pre>&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;조우상 - 경력기술서&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    ...
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+                </div>
+            </div>
+            
+            <div class="downloads-section">
+                <h3 class="downloads-title">다운로드</h3>
+                <div class="download-grid">
+                    <div class="download-card">
+                        <div class="download-preview">📄</div>
+                        <div class="download-info">
+                            <div class="download-header">
+                                <div class="download-name">HTML</div>
+                                <div class="download-price free">무료</div>
+                            </div>
+                            <div class="download-desc">웹 포트폴리오용 HTML 파일</div>
+                            <button class="download-btn" onclick="downloadHTML()">다운로드</button>
+                        </div>
+                    </div>
+                    
+                    <div class="download-card">
+                        <div class="download-preview">📑</div>
+                        <div class="download-info">
+                            <div class="download-header">
+                                <div class="download-name">PDF</div>
+                                <div class="download-price">₩9,900</div>
+                            </div>
+                            <div class="download-desc">인쇄 및 이메일 첨부용 PDF</div>
+                            <button class="download-btn" onclick="showPremiumModal()">구매하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="resetApp()">처음으로</button>
+                <button class="btn btn-secondary" onclick="goToStep(2)">다시 만들기</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Reapply (Optional) -->
+        <div class="step-container" id="step5">
+            <div class="step-header">
+                <div class="step-number">STEP 05</div>
+                <h2 class="step-title">수정 내용 반영</h2>
+                <p class="step-description">수정한 텍스트를 어떻게 반영할까요?</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 48px;">
+                <div class="template-card" onclick="selectReapplyOption('design')">
+                    <div style="padding: 32px;">
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase;">디자인만 적용</h3>
+                        <p style="margin-bottom: 24px; color: var(--text-secondary);">수정한 내용 그대로 유지하고 선택한 템플릿으로 디자인만 변경합니다.</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-family: 'Space Mono', monospace; font-size: 14px;">
+                            <div>⚡ 즉시 완료 (1-2초)</div>
+                            <div>✓ 무료 (횟수 차감 없음)</div>
+                        </div>
+                    </div>
+                    <div class="check-icon">✓</div>
+                </div>
+                
+                <div class="template-card" onclick="selectReapplyOption('ai')">
+                    <div style="padding: 32px;">
+                        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase;">AI로 재업그레이드</h3>
+                        <p style="margin-bottom: 24px; color: var(--text-secondary);">수정한 내용을 AI가 다시 분석해 문장을 더 전문적으로 다듬고 구조화합니다.</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-family: 'Space Mono', monospace; font-size: 14px;">
+                            <div>⏱️ 5-8초 소요</div>
+                            <div>⚠️ 무료 횟수 1회 차감</div>
+                        </div>
+                    </div>
+                    <div class="check-icon">✓</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="goToStep(4)">← 이전</button>
+                <button class="btn btn-primary" onclick="applyChanges()">🔄 반영하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">CareerBoost</div>
+                <div>© 2024 Jo-woosang. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- 로그인 모달 -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal('loginModal')">✕</div>
+            <h3 class="modal-title">로그인</h3>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">아이디</label>
+                    <input type="text" class="form-input" id="loginId" placeholder="아이디를 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <div class="form-error" id="loginError" style="display: none;"></div>
+                <div class="modal-buttons">
+                    <button type="submit" class="modal-btn">로그인</button>
+                    <div class="disabled-btn-wrapper" 
+                         data-tooltip="회원가입 기능은 추후 제공될 예정입니다" 
+                         style="flex: 1;">
+                        <button type="button" class="modal-btn" disabled style="opacity: 0.4; cursor: not-allowed; width: 100%;">회원가입</button>
+                    </div>
+                </div>
+            </form>
+            <p class="form-info">
+                ℹ️ 회원가입 기능은 추후 제공될 예정입니다.<br>
+                현재는 관리자 계정으로만 이용 가능합니다.
+            </p>
+        </div>
+    </div>
+    
+    <!-- 로그인 필요 모달 -->
+    <div class="modal" id="loginRequiredModal">
+        <div class="modal-content">
+            <h3 class="modal-title">로그인 필요</h3>
+            <p class="modal-text">AI 업그레이드 기능을 사용하려면 로그인이 필요합니다.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn" onclick="closeModalAndShowLogin()">로그인하기</button>
+                <button class="modal-btn" onclick="closeModal('loginRequiredModal')" style="background: var(--secondary); color: var(--primary);">취소</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="templatePreviewModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-close" onclick="closeModal('templatePreviewModal')">✕</div>
+            <div class="modal-preview">
+                <img class="modal-preview-image" id="previewImage" src="" alt="템플릿 미리보기">
+            </div>
+            <h3 class="modal-title" id="previewTitle" style="margin-top: 24px; text-align: center;">템플릿 미리보기</h3>
+        </div>
+    </div>
+    
+    <div class="modal" id="limitModal">
+        <div class="modal-content">
+            <h3 class="modal-title">오늘의 무료 사용 종료</h3>
+            <p class="modal-text">내일 다시 방문하시면 3회를 다시 사용할 수 있습니다.</p>
+            <div class="modal-buttons">
+                <button class="modal-btn" onclick="closeModal('limitModal')">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="premiumModal">
+        <div class="modal-content">
+            <h3 class="modal-title">프리미엄 기능</h3>
+            <p class="modal-text">PDF 다운로드는 곧 출시될 프리미엄 기능입니다. 조금만 기다려주세요!</p>
+            <div class="modal-buttons">
+                <button class="modal-btn" onclick="closeModal('premiumModal')">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let selectedTemplate = 'minimal';
+        let uploadedFile = null;
+        let profilePhotoData = null;
+        let usageCount = 0;
+        let reapplyOption = 'design';
+        let currentHeroSlide = 0;
+        const totalHeroSlides = 2;
+        
+        // API URL 설정
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001'
+            : 'https://careerboost-api.onrender.com'; // 실제 배포 시 변경 필요
+        let isLoggedIn = false;
+        let currentUser = null;
+        
+        // 관리자 계정
+        const ADMIN_ACCOUNT = {
+            id: 'woosang87',
+            password: 'whdntkd12#'
+        };
+        
+        // 페이지 로드 시 로그인 상태 확인
+        window.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            updateCharCount(); // 초기 글자 수 표시
+        });
+        
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('careerboost_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    isLoggedIn = true;
+                    updateUIForLoggedIn();
+                } catch (e) {
+                    localStorage.removeItem('careerboost_user');
+                }
+            }
+        }
+        
+        // 로그인 UI 업데이트
+        function updateUIForLoggedIn() {
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('usageIndicator').style.display = 'flex';
+            document.getElementById('username').textContent = currentUser.id;
+            
+            // 사용 횟수 복원
+            loadUsageCount();
+        }
+        
+        // 로그아웃 UI 업데이트
+        function updateUIForLoggedOut() {
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('usageIndicator').style.display = 'none';
+        }
+        
+        // 로그인 모달 표시
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('show');
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginId').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+        
+        // 로그인 처리
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            // 개발 모드 및 HTML 파일 직접 실행 시: 하드코딩된 계정 사용
+            const isDevelopment = window.location.hostname === 'localhost' || 
+                                 window.location.hostname === '127.0.0.1' ||
+                                 window.location.protocol === 'file:';
+            
+            if (isDevelopment) {
+                // 로컬 개발용 또는 HTML 직접 실행 시 간단 로그인
+                if (id === ADMIN_ACCOUNT.id && password === ADMIN_ACCOUNT.password) {
+                    currentUser = { id: id, username: id };
+                    isLoggedIn = true;
+                    localStorage.setItem('careerboost_user', JSON.stringify(currentUser));
+                    localStorage.setItem('careerboost_token', 'dev-token'); // 개발용 토큰
+                    
+                    updateUIForLoggedIn();
+                    closeModal('loginModal');
+                } else {
+                    errorEl.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+                    errorEl.style.display = 'block';
+                }
+                return;
+            }
+            
+            // 프로덕션 모드: 실제 API 호출
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: id, password })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    errorEl.textContent = error.error || '로그인에 실패했습니다.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                // 토큰과 사용자 정보 저장
+                localStorage.setItem('careerboost_token', data.token);
+                localStorage.setItem('careerboost_user', JSON.stringify(data.user));
+                
+                currentUser = data.user;
+                isLoggedIn = true;
+                
+                updateUIForLoggedIn();
+                closeModal('loginModal');
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                errorEl.textContent = '로그인 중 오류가 발생했습니다. 네트워크 연결을 확인해주세요.';
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        // 로그아웃
+        function logout() {
+            if (confirm('로그아웃하시겠습니까?')) {
+                isLoggedIn = false;
+                currentUser = null;
+                localStorage.removeItem('careerboost_user');
+                localStorage.removeItem('careerboost_token');
+                updateUIForLoggedOut();
+                
+                // 초기화
+                resetApp();
+            }
+        }
+        
+        // 토큰 가져오기
+        function getAuthToken() {
+            return localStorage.getItem('careerboost_token');
+        }
+        
+        // 로그인 필요 모달에서 로그인 모달로 이동
+        function closeModalAndShowLogin() {
+            closeModal('loginRequiredModal');
+            setTimeout(() => showLoginModal(), 300);
+        }
+        
+        // 로그인 확인 (AI 업그레이드 시)
+        function checkLoginBeforeUpgrade() {
+            if (!isLoggedIn) {
+                document.getElementById('loginRequiredModal').classList.add('show');
+                return false;
+            }
+            return true;
+        }
+        
+        // Hero Carousel functions
+        function goToHeroSlide(index) {
+            currentHeroSlide = index;
+            updateHeroCarousel();
+        }
+        
+        function updateHeroCarousel() {
+            const track = document.getElementById('heroCarouselTrack');
+            const offset = -currentHeroSlide * 100;
+            track.style.transform = `translateX(${offset}%)`;
+            
+            // Update indicators
+            document.querySelectorAll('.hero-dot').forEach((dot, index) => {
+                if (index === currentHeroSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+        
+        // Auto-play hero carousel
+        setInterval(() => {
+            currentHeroSlide = (currentHeroSlide + 1) % totalHeroSlides;
+            updateHeroCarousel();
+        }, 5000);
+        
+        // Template preview modal
+        function showTemplatePreview(template, event) {
+            event.stopPropagation(); // Prevent card selection
+            
+            const templateNames = {
+                'minimal': '미니멀 프로페셔널',
+                'creative': '모던 크리에이티브',
+                'formal': '클래식 포멀'
+            };
+            
+            const templateImages = {
+                'minimal': 'images/template-detail.png',
+                'creative': '',
+                'formal': ''
+            };
+            
+            const modal = document.getElementById('templatePreviewModal');
+            const image = document.getElementById('previewImage');
+            const title = document.getElementById('previewTitle');
+            
+            // Set image source - 상세 이미지 사용
+            image.src = templateImages[template] || document.querySelector(`[data-template-img="${template}"]`).src;
+            image.alt = templateNames[template];
+            title.textContent = templateNames[template];
+            
+            modal.classList.add('show');
+        }
+        
+        // Load usage from localStorage
+        function loadUsageCount() {
+            if (!isLoggedIn) {
+                return; // 로그인하지 않은 경우 로드하지 않음
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            const storageKey = `careerboost_usage_${currentUser.id}`; // 계정별 키
+            const stored = localStorage.getItem(storageKey);
+            
+            if (stored) {
+                const data = JSON.parse(stored);
+                if (data.date === today) {
+                    usageCount = data.count;
+                } else {
+                    usageCount = 0;
+                    localStorage.removeItem(storageKey);
+                }
+            }
+            
+            updateUsageBadge();
+        }
+        
+        // Update usage badge
+        function updateUsageBadge() {
+            if (!isLoggedIn) {
+                return; // 로그인하지 않은 경우 업데이트하지 않음
+            }
+            
+            const dots = [
+                document.getElementById('dot1'),
+                document.getElementById('dot2'),
+                document.getElementById('dot3')
+            ];
+            
+            dots.forEach((dot, index) => {
+                if (index < usageCount) {
+                    dot.classList.add('used');
+                } else {
+                    dot.classList.remove('used');
+                }
+            });
+            
+            document.getElementById('usageText').textContent = `${3 - usageCount}/3`;
+        }
+        
+        // Check usage limit
+        function checkUsageLimit() {
+            if (!isLoggedIn) {
+                return true; // 로그인하지 않은 경우 체크하지 않음 (로그인 모달이 먼저 뜸)
+            }
+            
+            if (usageCount >= 3) {
+                document.getElementById('limitModal').classList.add('show');
+                return false;
+            }
+            return true;
+        }
+        
+        // Increment usage
+        function incrementUsage() {
+            if (!isLoggedIn) {
+                return; // 로그인하지 않은 경우 증가하지 않음
+            }
+            
+            usageCount++;
+            const today = new Date().toISOString().split('T')[0];
+            const storageKey = `careerboost_usage_${currentUser.id}`; // 계정별 키
+            localStorage.setItem(storageKey, JSON.stringify({
+                date: today,
+                count: usageCount
+            }));
+            updateUsageBadge();
+        }
+        
+        // Template selection
+        function selectTemplate(template) {
+            selectedTemplate = template;
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-template="${template}"]`).classList.add('selected');
+        }
+        
+        // Switch input method
+        function switchInputMethod(method) {
+            document.querySelectorAll('.input-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-method="${method}"]`).classList.add('active');
+            
+            document.querySelectorAll('.input-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (method === 'text') {
+                document.getElementById('textInput').classList.add('active');
+            } else {
+                document.getElementById('fileInput').classList.add('active');
+            }
+        }
+        
+        // Fill example
+        function fillExample() {
+            document.getElementById('careerInput').value = `[개인정보]
+이름: 홍길동
+전화번호: 010-1234-5678
+이메일: honggildong@email.com
+생년월일: 1990년 5월 15일
+거주지: 서울시 성동구 옥수동
+
+[학력사항]
+[기간] 2010.03 - 2014.02
+[학교] 서울대학교 경영학과 졸업
+[학점] 3.9 / 4.5
+
+[경력사항]
+[회사명] OO전자
+[기간] 2016.03 - 2019.12
+[직책] 대리
+
+담당 업무:
+- AI 기반 피트니스 매칭 플랫폼 기획
+- 정책 및 기획 정의를 통한 개발 관리
+
+주요 성과:
+- 누적 사용자 15만명 달성
+- 누적 거래액 10억원 돌파
+- 시드 및 시리즈A 투자 유치 총 30억원
+- 월간 활성 사용자(MAU) 2만명 달성
+
+[회사명] 드라마앤컴퍼니
+[기간] 2020.01 - 2021.12
+[직책] 프로덕트 매니저
+
+담당 업무:
+- 리멤버 커리어 서비스 신규 기획
+- B2B 구독 모델 설계 및 론칭
+- 데이터 기반 서비스 개선`;
+            updateCharCount();
+        }
+        
+        // Toggle guide
+        function toggleGuide() {
+            const content = document.getElementById('guideContent');
+            const toggle = document.getElementById('guideToggle');
+            content.classList.toggle('show');
+            toggle.textContent = content.classList.contains('show') ? '▲' : '▼';
+        }
+        
+        // Update character count
+        function updateCharCount() {
+            const text = document.getElementById('careerInput').value;
+            const counter = document.getElementById('charCounter');
+            const length = text.length;
+            
+            counter.textContent = `${length} / 5,000자`;
+            
+            counter.classList.remove('warning', 'error');
+            
+            if (length > 5000) {
+                counter.classList.add('error');
+            } else if (length > 4000) {
+                counter.classList.add('warning');
+            }
+        }
+        
+        // Profile photo upload
+        function handleProfilePhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // 파일 크기 체크 (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기는 5MB를 초과할 수 없습니다.');
+                return;
+            }
+            
+            // 파일 타입 체크
+            if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match('image/jpg')) {
+                alert('JPG 또는 PNG 파일만 업로드 가능합니다.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profilePhotoData = e.target.result;
+                
+                // 미리보기 표시
+                const placeholder = document.querySelector('.profile-placeholder');
+                const img = document.getElementById('profileImage');
+                
+                placeholder.style.display = 'none';
+                img.src = profilePhotoData;
+                img.style.display = 'block';
+                
+                // 삭제 버튼 표시
+                document.getElementById('removePhotoBtn').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Remove profile photo
+        function removeProfilePhoto() {
+            profilePhotoData = null;
+            
+            const placeholder = document.querySelector('.profile-placeholder');
+            const img = document.getElementById('profileImage');
+            
+            placeholder.style.display = 'block';
+            img.style.display = 'none';
+            img.src = '';
+            
+            document.getElementById('photoInput').value = '';
+            document.getElementById('removePhotoBtn').style.display = 'none';
+        }
+        
+        // Clear all input
+        function clearInput() {
+            if (confirm('모든 입력 내용을 삭제하시겠습니까?')) {
+                document.getElementById('careerInput').value = '';
+                removeProfilePhoto();
+                updateCharCount();
+            }
+        }
+        
+        // File upload
+        const uploadZone = document.getElementById('uploadZone');
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+        
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        }
+        
+        function handleFileUpload(file) {
+            const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/x-hwp', 'application/pdf'];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(docx|hwp|pdf)$/i)) {
+                showError('지원하지 않는 파일 형식입니다.');
+                return;
+            }
+            
+            if (file.size > maxSize) {
+                showError('파일 크기는 10MB를 초과할 수 없습니다.');
+                return;
+            }
+            
+            uploadedFile = file;
+            document.getElementById('fileName').textContent = `${file.name} (${(file.size / 1024).toFixed(1)}KB)`;
+            document.getElementById('fileInfo').classList.add('show');
+            hideError();
+        }
+        
+        function removeFile() {
+            uploadedFile = null;
+            document.getElementById('fileInfo').classList.remove('show');
+            document.getElementById('fileInputEl').value = '';
+        }
+        
+        // Process career
+        async function processCareer() {
+            // 로그인 체크
+            if (!checkLoginBeforeUpgrade()) {
+                return;
+            }
+            
+            if (!checkUsageLimit()) {
+                return;
+            }
+            
+            const activeMethod = document.querySelector('.input-tab.active').dataset.method;
+            
+            if (activeMethod === 'text') {
+                const text = document.getElementById('careerInput').value.trim();
+                
+                if (text.length === 0) {
+                    showError('경력 정보를 입력해주세요.');
+                    return;
+                }
+                
+                if (text.length < 100) {
+                    showError('최소 100자 이상 입력해주세요.');
+                    return;
+                }
+                
+                if (text.length > 5000) {
+                    showError('5,000자를 초과했습니다.');
+                    return;
+                }
+            } else {
+                if (!uploadedFile) {
+                    showError('파일을 업로드해주세요.');
+                    return;
+                }
+            }
+            
+            hideError();
+            goToStep(3);
+            
+            // 개발 모드: 시뮬레이션
+            const isDevelopment = window.location.hostname === 'localhost' || 
+                                 window.location.hostname === '127.0.0.1';
+            
+            if (isDevelopment) {
+                simulateProcessing();
+                incrementUsage();
+                return;
+            }
+            
+            // 프로덕션 모드: 실제 API 호출
+            try {
+                const text = document.getElementById('careerInput').value.trim();
+                
+                const response = await fetch(`${API_URL}/api/career/upgrade`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify({
+                        careerText: text,
+                        template: selectedTemplate
+                    })
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // 인증 만료
+                        throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+                    } else if (response.status === 429) {
+                        // 사용 횟수 초과
+                        throw new Error('오늘의 무료 사용 횟수를 모두 소진했습니다.');
+                    }
+                    throw new Error('AI 업그레이드 중 오류가 발생했습니다.');
+                }
+                
+                const data = await response.json();
+                
+                // 업그레이드된 텍스트 적용
+                document.getElementById('careerInput').value = data.upgradedText;
+                
+                // 사용 횟수 증가
+                incrementUsage();
+                
+                // 성공 후 Step 4로 이동
+                setTimeout(() => {
+                    goToStep(4);
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Upgrade error:', error);
+                showError(error.message || 'AI 업그레이드 중 오류가 발생했습니다.');
+                
+                // 에러 시 Step 2로 돌아가기
+                setTimeout(() => {
+                    goToStep(2);
+                }, 2000);
+            }
+        }
+        
+        // Simulate processing
+        function simulateProcessing() {
+            const steps = [
+                document.getElementById('processStep1'),
+                document.getElementById('processStep2'),
+                document.getElementById('processStep3'),
+                document.getElementById('processStep4')
+            ];
+            
+            let currentStep = 0;
+            
+            const interval = setInterval(() => {
+                if (currentStep > 0) {
+                    steps[currentStep - 1].classList.remove('active');
+                }
+                
+                if (currentStep < steps.length) {
+                    steps[currentStep].classList.add('active');
+                    currentStep++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        goToStep(4);
+                    }, 500);
+                }
+            }, 2000);
+        }
+        
+        // Switch result tab
+        function switchResultTab(tab) {
+            document.querySelectorAll('.result-tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            
+            if (tab === 'preview') {
+                document.getElementById('previewTab').classList.add('active');
+            } else if (tab === 'editor') {
+                document.getElementById('editorTab').classList.add('active');
+            } else if (tab === 'html') {
+                document.getElementById('htmlTab').classList.add('active');
+            }
+        }
+        
+        // Editor functions
+        function copyText() {
+            const text = document.getElementById('textEditor').value;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('클립보드에 복사되었습니다!');
+            });
+        }
+        
+        function resetText() {
+            if (confirm('원본으로 되돌리시겠습니까?')) {
+                // Reset to original
+                alert('원본으로 되돌렸습니다.');
+            }
+        }
+        
+        // Reapply option
+        function selectReapplyOption(option) {
+            reapplyOption = option;
+            document.querySelectorAll('#step5 .template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+        
+        function applyChanges() {
+            if (reapplyOption === 'ai') {
+                // 로그인 체크
+                if (!checkLoginBeforeUpgrade()) {
+                    return;
+                }
+                
+                if (!checkUsageLimit()) {
+                    return;
+                }
+                incrementUsage();
+                goToStep(3);
+                simulateProcessing();
+            } else {
+                // Design only - instant
+                alert('디자인이 적용되었습니다!');
+                goToStep(4);
+            }
+        }
+        
+        // Download functions
+        function downloadHTML() {
+            // 업그레이드된 경력 데이터 가져오기
+            const careerText = document.getElementById('careerInput').value;
+            
+            // 미니멀 프로페셔널 템플릿 HTML 생성
+            const htmlContent = generateMinimalProfessionalHTML(careerText, profilePhotoData);
+            
+            // Blob 생성
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            // 다운로드 링크 생성
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `경력기술서_${new Date().getTime()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // 정리
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 미니멀 프로페셔널 HTML 생성
+        function generateMinimalProfessionalHTML(careerText, photoData) {
+            const photoHTML = photoData ? 
+                `<img src="${photoData}" alt="프로필 사진" style="width: 100%; height: auto; display: block;">` :
+                `<div style="width: 100%; aspect-ratio: 3/4; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 48px;">👤</div>`;
+            
+            return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경력기술서</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #fff;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+        
+        .header {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 3px solid #000;
+        }
+        
+        .profile-photo {
+            width: 180px;
+            flex-shrink: 0;
+        }
+        
+        .header-info {
+            flex: 1;
+        }
+        
+        .name {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            font-size: 15px;
+            color: #555;
+        }
+        
+        .contact-item {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .contact-label {
+            font-weight: 500;
+            min-width: 80px;
+            color: #000;
+        }
+        
+        .section {
+            margin-bottom: 28px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+            color: #000;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+        
+        .total-experience {
+            font-size: 16px;
+            font-weight: 500;
+            color: #999;
+        }
+        
+        .experience-item {
+            margin-bottom: 40px;
+        }
+        
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+        
+        .company-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .period {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .position {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .content {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            padding-left: 20px;
+            margin-left: 8px;
+        }
+        
+        .education-item {
+            margin-bottom: 20px;
+        }
+        
+        .school-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 4px;
+        }
+        
+        .education-details {
+            font-size: 15px;
+            color: #555;
+        }
+        
+        @media print {
+            @page {
+                margin: 0;
+                size: A4;
+            }
+            
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body {
+                background: white;
+                zoom: 0.75;
+                -moz-transform: scale(0.75);
+                -moz-transform-origin: 0 0;
+            }
+            
+            .container {
+                padding: 40px;
+                max-width: 100%;
+            }
+            
+            .header {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            
+            .section {
+                margin-bottom: 28px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            
+            .section-title {
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            
+            .education-item {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            .experience-item {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                margin-bottom: 32px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            .header {
+                flex-direction: column;
+            }
+            .profile-photo {
+                width: 150px;
+                margin: 0 auto;
+            }
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .total-experience {
+                font-size: 14px;
+            }
+            .content {
+                padding-left: 12px;
+                margin-left: 4px;
+            }
+            .content h4 {
+                margin-left: -12px;
+                padding-left: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="profile-photo">
+                ${photoHTML}
+            </div>
+            <div class="header-info">
+                <div class="name">${extractName(careerText)}</div>
+                <div class="contact-info">
+                    ${extractContactInfo(careerText)}
+                </div>
+            </div>
+        </div>
+        
+        ${parseCareerSections(careerText)}
+    </div>
+</body>
+</html>`;
+        }
+        
+        // 이름 추출
+        function extractName(text) {
+            const match = text.match(/이름[:\s]*([^\n]+)/);
+            return match ? match[1].trim() : '홍길동';
+        }
+        
+        // 연락처 정보 추출
+        function extractContactInfo(text) {
+            const info = [];
+            
+            const phone = text.match(/전화번호[:\s]*([^\n]+)/);
+            if (phone) info.push(`<div class="contact-item"><span class="contact-label">전화</span><span>${phone[1].trim()}</span></div>`);
+            
+            const email = text.match(/이메일[:\s]*([^\n]+)/);
+            if (email) info.push(`<div class="contact-item"><span class="contact-label">이메일</span><span>${email[1].trim()}</span></div>`);
+            
+            const birth = text.match(/생년월일[:\s]*([^\n]+)/);
+            if (birth) info.push(`<div class="contact-item"><span class="contact-label">생년월일</span><span>${birth[1].trim()}</span></div>`);
+            
+            const address = text.match(/거주지[:\s]*([^\n]+)/);
+            if (address) info.push(`<div class="contact-item"><span class="contact-label">거주지</span><span>${address[1].trim()}</span></div>`);
+            
+            return info.join('');
+        }
+        
+        // 총 근무 연차 계산
+        function calculateTotalExperience(careerText) {
+            const periodRegex = /\[기간\][:\s]*([^\n]+)/g;
+            let totalMonths = 0;
+            let match;
+            
+            while ((match = periodRegex.exec(careerText)) !== null) {
+                const periodStr = match[1].trim();
+                const months = parsePeriodToMonths(periodStr);
+                totalMonths += months;
+            }
+            
+            if (totalMonths === 0) return '';
+            
+            const years = Math.floor(totalMonths / 12);
+            const months = totalMonths % 12;
+            
+            if (years > 0 && months > 0) {
+                return `총 ${years}년 ${months}개월`;
+            } else if (years > 0) {
+                return `총 ${years}년`;
+            } else {
+                return `총 ${months}개월`;
+            }
+        }
+        
+        // 기간 문자열을 월 단위로 변환
+        function parsePeriodToMonths(periodStr) {
+            // "2021.03 - 현재" 또는 "2021.03 - 2024.12" 형식 파싱
+            const parts = periodStr.split('-').map(p => p.trim());
+            if (parts.length !== 2) return 0;
+            
+            const startDate = parseDate(parts[0]);
+            let endDate;
+            
+            if (parts[1] === '현재' || parts[1].includes('현재')) {
+                endDate = new Date();
+            } else {
+                endDate = parseDate(parts[1]);
+            }
+            
+            if (!startDate || !endDate) return 0;
+            
+            const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 
+                         + (endDate.getMonth() - startDate.getMonth());
+            
+            return Math.max(0, months);
+        }
+        
+        // 날짜 문자열 파싱 (2021.03, 2021-03 등)
+        function parseDate(dateStr) {
+            const cleaned = dateStr.replace(/[\s년월]/g, '').trim();
+            const match = cleaned.match(/(\d{4})[\.\-\/](\d{1,2})/);
+            
+            if (match) {
+                const year = parseInt(match[1]);
+                const month = parseInt(match[2]) - 1; // 0-based
+                return new Date(year, month, 1);
+            }
+            
+            return null;
+        }
+        
+        // 섹션 파싱
+        function parseCareerSections(text) {
+            let html = '';
+            
+            // 학력사항
+            if (text.includes('[학력사항]')) {
+                html += '<div class="section"><h2 class="section-title">학력사항</h2>';
+                const eduSection = text.match(/\[학력사항\]([\s\S]*?)(?=\[경력사항\]|\[|$)/);
+                if (eduSection) {
+                    const eduText = eduSection[1].trim();
+                    const school = eduText.match(/\[학교\][:\s]*([^\n]+)/);
+                    const period = eduText.match(/\[기간\][:\s]*([^\n]+)/);
+                    const gpa = eduText.match(/\[학점\][:\s]*([^\n]+)/);
+                    
+                    html += '<div class="education-item">';
+                    if (school) html += `<div class="school-name">${school[1].trim()}</div>`;
+                    html += '<div class="education-details">';
+                    if (period) html += `${period[1].trim()}`;
+                    if (gpa) html += ` • 학점: ${gpa[1].trim()}`;
+                    html += '</div></div>';
+                }
+                html += '</div>';
+            }
+            
+            // 경력사항
+            if (text.includes('[경력사항]')) {
+                const careerSection = text.match(/\[경력사항\]([\s\S]*?)(?=$)/);
+                let totalExperience = '';
+                
+                if (careerSection) {
+                    // 총 근무 연차 계산
+                    totalExperience = calculateTotalExperience(careerSection[1]);
+                }
+                
+                html += `<div class="section"><h2 class="section-title">경력사항 <span class="total-experience">${totalExperience}</span></h2>`;
+                
+                if (careerSection) {
+                    const companies = careerSection[1].split(/(?=\[회사명\])/);
+                    
+                    companies.forEach(company => {
+                        if (!company.trim()) return;
+                        
+                        const companyName = company.match(/\[회사명\][:\s]*([^\n]+)/);
+                        const period = company.match(/\[기간\][:\s]*([^\n]+)/);
+                        const position = company.match(/\[직책\][:\s]*([^\n]+)/);
+                        
+                        if (companyName) {
+                            html += '<div class="experience-item">';
+                            html += '<div class="company-header">';
+                            html += `<div class="company-name">${companyName[1].trim()}</div>`;
+                            if (period) html += `<div class="period">${period[1].trim()}</div>`;
+                            html += '</div>';
+                            if (position) html += `<div class="position">${position[1].trim()}</div>`;
+                            
+                            // 나머지 내용
+                            let content = company
+                                .replace(/\[회사명\][:\s]*[^\n]+/, '')
+                                .replace(/\[기간\][:\s]*[^\n]+/, '')
+                                .replace(/\[직책\][:\s]*[^\n]+/, '')
+                                .trim();
+                            
+                            if (content) {
+                                html += `<div class="content">${content}</div>`;
+                            }
+                            html += '</div>';
+                        }
+                    });
+                }
+                html += '</div>';
+            }
+            
+            return html;
+        }
+        
+        function showPremiumModal() {
+            document.getElementById('premiumModal').classList.add('show');
+        }
+        
+        // Navigation
+        function goToStep(step) {
+            document.querySelectorAll('.step-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            document.getElementById(`step${step}`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function resetApp() {
+            document.getElementById('careerInput').value = '';
+            removeFile();
+            selectTemplate('minimal');
+            goToStep(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Error handling
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+        
+        // Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        // Initialize
+        loadUsage();
+        selectTemplate('minimal');
+    </script>
+</body>
+</html>
