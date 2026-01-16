@@ -1505,53 +1505,67 @@
                 padding: 0 20px;
             }
             
+            /* 모바일 헤더 개선: 로고 우측에 로그인 버튼 */
             .header-content {
-                flex-wrap: wrap;
+                padding: 8px 0;
+            }
+            
+            .logo {
+                font-size: 18px;
+                padding: 4px 10px;
             }
             
             .header-right {
-                flex-direction: column;
-                width: 100%;
+                flex-direction: row;
                 gap: 8px;
-                margin-top: 12px;
+                margin-top: 0;
             }
             
             .auth-buttons {
-                width: 100%;
-                justify-content: stretch;
+                gap: 6px;
             }
             
             .auth-btn {
-                flex: 1;
-                font-size: 12px;
-                padding: 8px 12px;
+                font-size: 11px;
+                padding: 6px 10px;
+                border-width: 2px;
             }
             
             .user-info {
-                width: 100%;
-                justify-content: space-between;
-                font-size: 12px;
-                padding: 8px 12px;
+                font-size: 11px;
+                padding: 6px 10px;
+                border-width: 2px;
+                gap: 6px;
+            }
+            
+            .logout-btn {
+                font-size: 10px;
+                padding: 3px 8px;
             }
             
             .usage-indicator {
-                width: 100%;
-                justify-content: center;
-                padding: 8px 12px;
+                font-size: 11px;
+                padding: 6px 10px;
+                border-width: 2px;
             }
             
             .usage-indicator::before,
             .disabled-btn-wrapper::before {
-                left: 50%;
-                right: auto;
-                transform: translateX(-50%);
+                font-size: 10px;
+                padding: 6px 10px;
             }
             
-            .usage-indicator::after,
-            .disabled-btn-wrapper::after {
-                left: 50%;
-                right: auto;
-                transform: translateX(-50%);
+            /* 모바일 캐러셀: 1개만 표시 */
+            .hero-carousel-container {
+                min-height: 300px;
+            }
+            
+            .hero-slide:nth-child(n+2) {
+                display: none !important;
+            }
+            
+            .hero-indicators {
+                display: none !important;
             }
             
             .hero-slide h1 {
@@ -2149,7 +2163,7 @@
         // API URL 설정
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3001'
-            : '';
+            : ''; // Vercel에서는 상대 경로 사용
         let isLoggedIn = false;
         let currentUser = null;
         
@@ -2213,10 +2227,8 @@
             const password = document.getElementById('loginPassword').value;
             const errorEl = document.getElementById('loginError');
             
-            // 개발 모드 및 HTML 파일 직접 실행 시: 하드코딩된 계정 사용
-            const isDevelopment = window.location.hostname === 'localhost' || 
-                                 window.location.hostname === '127.0.0.1' ||
-                                 window.location.protocol === 'file:';
+            // 간단 로그인 모드 활성화 (모든 환경에서 사용 가능)
+            const isDevelopment = true;
             
             if (isDevelopment) {
                 // 로컬 개발용 또는 HTML 직접 실행 시 간단 로그인
