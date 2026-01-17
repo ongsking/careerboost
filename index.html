@@ -1505,62 +1505,120 @@
                 padding: 0 20px;
             }
             
-            /* 모바일 헤더 개선: 로고 우측에 로그인 버튼 */
+            /* 모바일 헤더 개선 */
             .header-content {
-                padding: 8px 0;
+                padding: 10px 0;
+                gap: 10px;
             }
             
             .logo {
-                font-size: 18px;
-                padding: 4px 10px;
+                font-size: 16px;
+                padding: 6px 12px;
+                border-width: 2px;
             }
             
             .header-right {
-                flex-direction: row;
-                gap: 8px;
-                margin-top: 0;
+                flex-direction: column;
+                gap: 6px;
+                align-items: stretch;
             }
             
             .auth-buttons {
+                display: flex;
                 gap: 6px;
             }
             
             .auth-btn {
                 font-size: 11px;
-                padding: 6px 10px;
+                padding: 6px 12px;
                 border-width: 2px;
+                white-space: nowrap;
             }
             
+            /* 로그인 후 사용자 정보 영역 개선 */
             .user-info {
-                font-size: 11px;
+                font-size: 10px;
                 padding: 6px 10px;
                 border-width: 2px;
                 gap: 6px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .user-info span:first-child {
+                flex: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             
             .logout-btn {
-                font-size: 10px;
-                padding: 3px 8px;
+                font-size: 9px;
+                padding: 4px 8px;
+                border-width: 1px;
+                flex-shrink: 0;
             }
             
+            /* 사용량 표시 개선 */
             .usage-indicator {
-                font-size: 11px;
+                font-size: 10px;
                 padding: 6px 10px;
                 border-width: 2px;
+                justify-content: center;
+                width: 100%;
             }
             
-            .usage-indicator::before,
-            .disabled-btn-wrapper::before {
+            .usage-indicator .usage-count {
                 font-size: 10px;
+            }
+            
+            .usage-indicator::before {
+                font-size: 9px;
                 padding: 6px 10px;
+                white-space: normal;
+                max-width: 200px;
+                left: 50%;
+                transform: translateX(-50%);
             }
             
-            /* 모바일 캐러셀: 1개만 표시 */
+            /* 모바일 캐러셀: 텍스트만 표시 */
             .hero-carousel-container {
-                min-height: 300px;
+                min-height: auto;
+                padding: 40px 0;
             }
             
+            .hero-carousel-track {
+                display: block;
+            }
+            
+            .hero-slide {
+                min-width: 100%;
+                padding: 0;
+            }
+            
+            /* 첫 번째 슬라이드만 표시하고 이미지는 숨김 */
             .hero-slide:nth-child(n+2) {
+                display: none !important;
+            }
+            
+            .hero-slide h1 {
+                font-size: 32px;
+                padding: 20px;
+                border-width: 4px;
+                box-shadow: 6px 6px 0 var(--primary);
+                margin-bottom: 16px;
+            }
+            
+            .hero-slide p {
+                font-size: 14px;
+                margin: 20px auto 0;
+                padding-left: 12px;
+                border-left-width: 4px;
+            }
+            
+            /* 이미지와 인디케이터 숨김 */
+            .hero-slide-image {
                 display: none !important;
             }
             
@@ -2691,65 +2749,10 @@
             hideError();
             goToStep(3);
             
-            // 개발 모드: 시뮬레이션
-            const isDevelopment = window.location.hostname === 'localhost' || 
-                                 window.location.hostname === '127.0.0.1';
-            
-            if (isDevelopment) {
-                simulateProcessing();
-                incrementUsage();
-                return;
-            }
-            
-            // 프로덕션 모드: 실제 API 호출
-            try {
-                const text = document.getElementById('careerInput').value.trim();
-                
-                const response = await fetch(`${API_URL}/api/career/upgrade`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getAuthToken()}`
-                    },
-                    body: JSON.stringify({
-                        careerText: text,
-                        template: selectedTemplate
-                    })
-                });
-                
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // 인증 만료
-                        throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
-                    } else if (response.status === 429) {
-                        // 사용 횟수 초과
-                        throw new Error('오늘의 무료 사용 횟수를 모두 소진했습니다.');
-                    }
-                    throw new Error('AI 업그레이드 중 오류가 발생했습니다.');
-                }
-                
-                const data = await response.json();
-                
-                // 업그레이드된 텍스트 적용
-                document.getElementById('careerInput').value = data.upgradedText;
-                
-                // 사용 횟수 증가
-                incrementUsage();
-                
-                // 성공 후 Step 4로 이동
-                setTimeout(() => {
-                    goToStep(4);
-                }, 1500);
-                
-            } catch (error) {
-                console.error('Upgrade error:', error);
-                showError(error.message || 'AI 업그레이드 중 오류가 발생했습니다.');
-                
-                // 에러 시 Step 2로 돌아가기
-                setTimeout(() => {
-                    goToStep(2);
-                }, 2000);
-            }
+            // 시뮬레이션 모드 (모든 환경에서 사용)
+            simulateProcessing();
+            incrementUsage();
+            return;
         }
         
         // Simulate processing
