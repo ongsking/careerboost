@@ -223,6 +223,32 @@
             opacity: 1;
         }
         
+        /* 관리자 전용 리셋 버튼 */
+        .admin-reset-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border: 2px solid var(--accent);
+            background: var(--secondary);
+            color: var(--accent);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-left: 8px;
+            display: none; /* 기본적으로 숨김 */
+        }
+        
+        .admin-reset-btn:hover {
+            background: var(--accent);
+            color: var(--secondary);
+            transform: scale(1.05);
+        }
+        
+        .admin-reset-btn.show {
+            display: inline-block;
+        }
+        
         .usage-dot {
             width: 18px;
             height: 18px;
@@ -1569,6 +1595,14 @@
                 width: 100%;
             }
             
+            /* 관리자 리셋 버튼 모바일 크기 */
+            .admin-reset-btn {
+                font-size: 9px;
+                padding: 3px 6px;
+                border-width: 1px;
+                margin-left: 4px;
+            }
+            
             .usage-indicator .usage-count {
                 font-size: 10px;
             }
@@ -1721,6 +1755,7 @@
                         <div class="usage-dot" id="dot2"></div>
                         <div class="usage-dot" id="dot3"></div>
                         <span id="usageText">3/3</span>
+                        <button class="admin-reset-btn" id="adminResetBtn" onclick="adminResetUsage()" title="관리자 전용: 사용량 리셋 (Ctrl+Shift+R)">🔄</button>
                     </div>
                 </div>
             </div>
@@ -2221,8 +2256,49 @@
             document.getElementById('usageIndicator').style.display = 'flex';
             document.getElementById('username').textContent = currentUser.id;
             
+            // 관리자 계정 체크 및 리셋 버튼 표시
+            checkAndShowAdminFeatures();
+            
             // 사용 횟수 복원
             loadUsageCount();
+        }
+        
+        // 관리자 계정 체크 및 기능 활성화
+        function checkAndShowAdminFeatures() {
+            const adminResetBtn = document.getElementById('adminResetBtn');
+            
+            // 관리자 계정인 경우에만 리셋 버튼 표시
+            if (currentUser && currentUser.id === 'woosang87') {
+                adminResetBtn.classList.add('show');
+                console.log('✅ 관리자 모드 활성화: 사용량 리셋 버튼 활성화됨');
+                console.log('💡 단축키: Ctrl + Shift + R');
+            } else {
+                adminResetBtn.classList.remove('show');
+            }
+        }
+        
+        // 관리자 전용: 사용량 리셋
+        function adminResetUsage() {
+            // 관리자 계정 재확인
+            if (!currentUser || currentUser.id !== 'woosang87') {
+                alert('❌ 관리자 계정만 사용할 수 있습니다.');
+                return;
+            }
+            
+            if (confirm('🔄 관리자 권한으로 사용량을 리셋하시겠습니까?\n\n오늘의 AI 업그레이드 횟수가 3/3으로 복원됩니다.')) {
+                // 사용량 리셋
+                const storageKey = `careerboost_usage_${currentUser.id}`;
+                localStorage.removeItem(storageKey);
+                usageCount = 0;
+                
+                // UI 업데이트
+                updateUsageBadge();
+                
+                // 성공 메시지
+                alert('✅ 사용량이 리셋되었습니다!\n\n남은 횟수: 3/3');
+                
+                console.log('✅ 관리자 사용량 리셋 완료');
+            }
         }
         
         // 로그아웃 UI 업데이트
@@ -3412,6 +3488,20 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
         }
+        
+        // 관리자 전용 키보드 단축키: Ctrl + Shift + R
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + Shift + R
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault(); // 기본 새로고침 방지
+                
+                if (currentUser && currentUser.id === 'woosang87') {
+                    adminResetUsage();
+                } else if (isLoggedIn) {
+                    console.log('❌ 관리자 계정만 사용할 수 있는 기능입니다.');
+                }
+            }
+        });
         
         // Initialize
         loadUsage();
