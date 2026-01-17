@@ -1952,7 +1952,7 @@
             <div class="step-header">
                 <div class="step-number">STEP 04</div>
                 <h2 class="step-title">결과 확인</h2>
-                <p class="step-description">AI가 업그레이드한 경력기술서를 확인하세요</p>
+                <p class="step-description">AI가 업그레이드한 경력기술서를 확인하고 필요시 수정하세요</p>
             </div>
             
             <div class="results-stats">
@@ -1983,18 +1983,8 @@
             </div>
             
             <div class="tab-content active" id="previewTab">
-                <div class="preview-container">
-                    <h3 style="font-size: 32px; margin-bottom: 8px;">조우상</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 32px;">프로덕트 매니저 / 스타트업 대표</p>
-                    
-                    <h4 style="margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">핵심역량</h4>
-                    <p style="margin-bottom: 32px;">프로덕트 매니지먼트 및 빠른 실행력: 빠른 시장 검증을 위한 MVP 개발...</p>
-                    
-                    <h4 style="margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">경력</h4>
-                    <div style="margin-bottom: 24px;">
-                        <strong>더핏</strong> | 대표이사 | 2016.03 - 2019.12<br>
-                        <p style="margin-top: 12px; color: var(--text-secondary);">AI 기반 피트니스 매칭 플랫폼을 개발하여 누적 15만 사용자를 달성...</p>
-                    </div>
+                <div class="preview-container" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                    <p>AI 업그레이드가 완료되면 여기에 미리보기가 표시됩니다...</p>
                 </div>
             </div>
             
@@ -2003,48 +1993,15 @@
                     <div class="editor-toolbar">
                         <button class="editor-btn" onclick="copyText()">📋 전체 복사</button>
                         <button class="editor-btn" onclick="resetText()">↻ 되돌리기</button>
-                        <button class="editor-btn primary" onclick="goToStep(5)">✓ 수정 완료</button>
+                        <button class="editor-btn primary" onclick="applyTextEdits()" id="applyEditsBtn">🔄 수정 내용 HTML에 반영 (0/1)</button>
                     </div>
-                    <textarea id="textEditor">조우상
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-직무
-프로덕트 매니저 / 스타트업 대표
-
-연락처
-• 이메일: example@email.com
-• 전화: 010-1234-5678
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-핵심역량
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-1. 프로덕트 매니지먼트 및 빠른 실행력
-빠른 시장 검증을 위한 MVP 개발 및 반복적 개선 전문...
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-경력
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[더핏]
-직책: 대표이사
-기간: 2016.03 - 2019.12
-
-▸ 프로젝트: 더핏 - AI 기반 피트니스 매칭 플랫폼
-...</textarea>
+                    <textarea id="textEditor" placeholder="AI 업그레이드가 완료되면 여기에 생성된 텍스트가 표시됩니다..."></textarea>
                 </div>
             </div>
             
             <div class="tab-content" id="htmlTab">
                 <div class="code-container">
-                    <pre>&lt;html&gt;
-  &lt;head&gt;
-    &lt;title&gt;조우상 - 경력기술서&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-    ...
-  &lt;/body&gt;
-&lt;/html&gt;</pre>
+                    <pre style="text-align: center; color: var(--text-secondary); padding: 40px;">AI 업그레이드가 완료되면 여기에 HTML 코드가 표시됩니다...</pre>
                 </div>
             </div>
             
@@ -2058,7 +2015,7 @@
                                 <div class="download-name">HTML</div>
                                 <div class="download-price free">무료</div>
                             </div>
-                            <div class="download-desc">웹 포트폴리오용 HTML 파일</div>
+                            <div class="download-desc">웹 포트폴리오용 HTML 파일<br><small style="color: var(--text-secondary); font-size: 12px;">💡 브라우저에서 [인쇄 → PDF로 저장]하면 PDF로 변환됩니다</small></div>
                             <button class="download-btn" onclick="downloadHTML()">다운로드</button>
                         </div>
                     </div>
@@ -2224,6 +2181,12 @@
             : ''; // Vercel에서는 상대 경로 사용
         let isLoggedIn = false;
         let currentUser = null;
+        
+        // 생성된 HTML 관리
+        let generatedHTML = '';
+        let originalCareerText = '';
+        let editCount = 0;
+        const MAX_EDIT_COUNT = 1;
         
         // 관리자 계정
         const ADMIN_ACCOUNT = {
@@ -2850,14 +2813,14 @@
         
         // Download functions
         function downloadHTML() {
-            // 업그레이드된 경력 데이터 가져오기
-            const careerText = document.getElementById('careerInput').value;
-            
-            // 미니멀 프로페셔널 템플릿 HTML 생성
-            const htmlContent = generateMinimalProfessionalHTML(careerText, profilePhotoData);
+            // 생성된 HTML이 없으면 경고
+            if (!generatedHTML) {
+                alert('먼저 AI 업그레이드를 완료해주세요.');
+                return;
+            }
             
             // Blob 생성
-            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const blob = new Blob([generatedHTML], { type: 'text/html;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             
             // 다운로드 링크 생성
@@ -3310,7 +3273,120 @@
                 container.classList.remove('active');
             });
             document.getElementById(`step${step}`).classList.add('active');
+            
+            // Step 4 진입 시: HTML 생성 및 모든 탭 동기화
+            if (step === 4) {
+                updateStep4Content();
+            }
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Step 4 콘텐츠 업데이트
+        function updateStep4Content() {
+            const careerText = document.getElementById('careerInput').value;
+            originalCareerText = careerText;
+            
+            // 1. HTML 생성
+            generatedHTML = generateMinimalProfessionalHTML(careerText, profilePhotoData);
+            
+            // 2. 미리보기 탭 업데이트
+            updatePreviewTab(generatedHTML);
+            
+            // 3. 텍스트 편집기 업데이트
+            document.getElementById('textEditor').value = careerText;
+            
+            // 4. HTML 탭 업데이트
+            updateHTMLTab(generatedHTML);
+            
+            // 5. 편집 버튼 상태 초기화
+            updateEditorButtons();
+        }
+        
+        // 미리보기 탭 업데이트
+        function updatePreviewTab(htmlContent) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const container = doc.querySelector('.container');
+            
+            if (container) {
+                document.getElementById('previewTab').innerHTML = 
+                    '<div class="preview-container" style="background: #fff; padding: 40px; border: 1px solid #e0e0e0; max-height: 600px; overflow-y: auto;">' +
+                    container.innerHTML +
+                    '</div>';
+            }
+        }
+        
+        // HTML 탭 업데이트
+        function updateHTMLTab(htmlContent) {
+            const escaped = htmlContent
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+            
+            document.getElementById('htmlTab').innerHTML = 
+                '<div class="code-container"><pre>' + escaped + '</pre></div>';
+        }
+        
+        // 편집기 버튼 상태 업데이트
+        function updateEditorButtons() {
+            const applyBtn = document.querySelector('.editor-toolbar .primary');
+            if (editCount >= MAX_EDIT_COUNT) {
+                applyBtn.disabled = true;
+                applyBtn.textContent = `✓ 반영 완료 (${editCount}/${MAX_EDIT_COUNT})`;
+                applyBtn.style.opacity = '0.5';
+                applyBtn.style.cursor = 'not-allowed';
+            } else {
+                applyBtn.disabled = false;
+                applyBtn.textContent = `🔄 수정 내용 HTML에 반영 (${editCount}/${MAX_EDIT_COUNT})`;
+                applyBtn.style.opacity = '1';
+                applyBtn.style.cursor = 'pointer';
+            }
+        }
+        
+        // 텍스트 편집 후 HTML 재생성
+        function applyTextEdits() {
+            if (editCount >= MAX_EDIT_COUNT) {
+                alert('수정 내용 반영은 1회만 가능합니다.');
+                return;
+            }
+            
+            const editedText = document.getElementById('textEditor').value;
+            
+            if (!editedText.trim()) {
+                alert('내용이 비어있습니다.');
+                return;
+            }
+            
+            // 확인 메시지
+            if (!confirm('수정한 내용으로 HTML을 다시 생성합니다.\n이 작업은 1회만 가능하며, 되돌릴 수 없습니다.\n\n계속하시겠습니까?')) {
+                return;
+            }
+            
+            // HTML 재생성
+            generatedHTML = generateMinimalProfessionalHTML(editedText, profilePhotoData);
+            
+            // 미리보기 및 HTML 탭 업데이트
+            updatePreviewTab(generatedHTML);
+            updateHTMLTab(generatedHTML);
+            
+            // 편집 횟수 증가
+            editCount++;
+            updateEditorButtons();
+            
+            // 성공 메시지
+            alert('✅ 수정 내용이 HTML에 반영되었습니다!\n미리보기 탭과 HTML 탭에서 확인하세요.');
+            
+            // 미리보기 탭으로 자동 전환
+            switchResultTab('preview');
+        }
+        
+        // 텍스트 되돌리기
+        function resetText() {
+            if (confirm('원래 텍스트로 되돌리시겠습니까?')) {
+                document.getElementById('textEditor').value = originalCareerText;
+            }
         }
         
         function resetApp() {
