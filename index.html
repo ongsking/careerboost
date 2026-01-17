@@ -1991,39 +1991,17 @@
             </div>
             
             <div class="results-stats">
-                <div class="stat-card">
-                    <div class="stat-value">2</div>
-                    <div class="stat-label">회사 경력</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">5</div>
-                    <div class="stat-label">프로젝트</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">4</div>
-                    <div class="stat-label">핵심역량</div>
+                <div class="stat-card" style="max-width: 400px; margin: 0 auto;">
+                    <div class="stat-value" id="companyCount">0</div>
+                    <div class="stat-label">개의 회사 경력이 반영되었습니다</div>
                 </div>
             </div>
             
-            <div class="result-tabs">
-                <button class="result-tab active" onclick="switchResultTab('preview')">
-                    👁️ 미리보기
-                </button>
-                <button class="result-tab" onclick="switchResultTab('editor')">
-                    ✏️ 텍스트 편집기
-                </button>
-                <button class="result-tab" onclick="switchResultTab('html')">
-                    &lt;/&gt; HTML
-                </button>
-            </div>
-            
-            <div class="tab-content active" id="previewTab">
-                <div class="preview-container" style="padding: 40px; text-align: center; color: var(--text-secondary);">
-                    <p>AI 업그레이드가 완료되면 여기에 미리보기가 표시됩니다...</p>
+            <!-- 텍스트 편집기 (탭 제거, 바로 표시) -->
+            <div class="tab-content active" id="editorTab">
+                <div class="editor-info" style="background: #f0f7ff; border-left: 4px solid var(--primary); padding: 16px 20px; margin-bottom: 24px; border-radius: 4px; font-size: 14px; color: var(--text-dark);">
+                    💡 <strong>경력기술서에 반영된 내용입니다.</strong> 내용을 수정하거나 추가해보세요.
                 </div>
-            </div>
-            
-            <div class="tab-content" id="editorTab">
                 <div class="editor-container">
                     <div class="editor-toolbar">
                         <button class="editor-btn" onclick="copyText()">📋 전체 복사</button>
@@ -2031,12 +2009,6 @@
                         <button class="editor-btn primary" onclick="applyTextEdits()" id="applyEditsBtn">🔄 수정 내용 HTML에 반영 (0/1)</button>
                     </div>
                     <textarea id="textEditor" placeholder="AI 업그레이드가 완료되면 여기에 생성된 텍스트가 표시됩니다..."></textarea>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="htmlTab">
-                <div class="code-container">
-                    <pre style="text-align: center; color: var(--text-secondary); padding: 40px;">AI 업그레이드가 완료되면 여기에 HTML 코드가 표시됩니다...</pre>
                 </div>
             </div>
             
@@ -2823,25 +2795,6 @@
         }
         
         // Switch result tab
-        function switchResultTab(tab) {
-            document.querySelectorAll('.result-tab').forEach(t => {
-                t.classList.remove('active');
-            });
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            event.target.classList.add('active');
-            
-            if (tab === 'preview') {
-                document.getElementById('previewTab').classList.add('active');
-            } else if (tab === 'editor') {
-                document.getElementById('editorTab').classList.add('active');
-            } else if (tab === 'html') {
-                document.getElementById('htmlTab').classList.add('active');
-            }
-        }
         
         // Editor functions
         function copyText() {
@@ -2934,7 +2887,7 @@
         
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            line-height: 1.8;
+            line-height: 1.7;
             color: #333;
             background: #fff;
         }
@@ -2943,18 +2896,19 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 60px 40px;
+            border-left: 4px solid #667eea;
         }
         
         .header {
             display: flex;
             gap: 40px;
-            margin-bottom: 60px;
-            padding-bottom: 40px;
-            border-bottom: 3px solid #000;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
         }
         
         .profile-photo {
-            width: 180px;
+            width: 160px;
             flex-shrink: 0;
         }
         
@@ -2963,17 +2917,17 @@
         }
         
         .name {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             color: #000;
         }
         
         .contact-info {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            font-size: 15px;
+            gap: 10px;
+            font-size: 14px;
             color: #555;
         }
         
@@ -2984,88 +2938,131 @@
         
         .contact-label {
             font-weight: 500;
-            min-width: 80px;
+            min-width: 75px;
             color: #000;
         }
         
         .section {
-            margin-bottom: 28px;
+            margin-bottom: 35px;
         }
         
         .section-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #000;
             color: #000;
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-        }
-        
-        .total-experience {
-            font-size: 16px;
-            font-weight: 500;
-            color: #999;
         }
         
         .experience-item {
             margin-bottom: 40px;
+            padding: 24px;
+            background: #fafafa;
+            border-radius: 8px;
         }
         
         .company-header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .company-name {
             font-size: 20px;
             font-weight: 700;
-            color: #000;
-            background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #fff;
+            background: #667eea;
+            padding: 4px 12px;
+            border-radius: 4px;
+            display: inline-block;
         }
         
         .period {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
             font-weight: 500;
         }
         
         .position {
-            font-size: 16px;
+            font-size: 15px;
             color: #555;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             font-weight: 500;
         }
         
-        .content {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #333;
-            white-space: pre-wrap;
-            padding-left: 20px;
-            margin-left: 8px;
-        }
-        
-        .education-item {
+        .subsection {
             margin-bottom: 20px;
         }
         
+        .subsection-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .subsection-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #444;
+            padding-left: 24px;
+        }
+        
+        .subsection-content p {
+            margin-bottom: 10px;
+        }
+        
+        .subsection-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .subsection-content li {
+            position: relative;
+            padding-left: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .subsection-content li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .star-label {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-right: 6px;
+        }
+        
+        .education-item {
+            margin-bottom: 18px;
+            padding: 16px;
+            background: #f8f8f8;
+            border-radius: 6px;
+        }
+        
         .school-name {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             color: #000;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         
         .education-details {
-            font-size: 15px;
+            font-size: 14px;
             color: #555;
         }
         
@@ -3082,50 +3079,65 @@
             
             body {
                 background: white;
-                zoom: 0.75;
-                -moz-transform: scale(0.75);
-                -moz-transform-origin: 0 0;
             }
             
             .container {
-                padding: 40px;
+                padding: 30px;
                 max-width: 100%;
             }
             
-            .header {
-                page-break-after: avoid;
-                break-after: avoid;
-            }
-            
             .section {
-                margin-bottom: 28px;
                 page-break-inside: avoid;
-                break-inside: avoid;
-                page-break-after: avoid;
-                break-after: avoid;
-            }
-            
-            .section-title {
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-                page-break-after: avoid;
-                break-after: avoid;
-            }
-            
-            .education-item {
-                page-break-inside: avoid;
-                break-inside: avoid;
             }
             
             .experience-item {
                 page-break-inside: avoid;
-                break-inside: avoid;
-                margin-bottom: 32px;
             }
         }
         
         @media (max-width: 768px) {
             .container {
+                padding: 30px 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .profile-photo {
+                width: 120px;
+            }
+            
+            .name {
+                font-size: 26px;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="profile-photo">
+                ${photoHTML}
+            </div>
+            <div class="header-info">
+                <div class="name">${extractName(careerText)}</div>
+                <div class="contact-info">
+                    ${extractContactInfo(careerText)}
+                </div>
+            </div>
+        </div>
+        
+        ${parseCareerSections(careerText)}
+    </div>
+</body>
+</html>`;
+        }
                 padding: 40px 20px;
             }
             .header {
@@ -3265,44 +3277,64 @@
             return null;
         }
         
-        // 섹션 파싱
+        // 섹션 파싱 (샘플 스타일에 맞게)
         function parseCareerSections(text) {
             let html = '';
             
             // 학력사항
-            if (text.includes('[학력사항]')) {
+            if (text.includes('[학력사항]') || text.match(/학력|대학|학사|석사|박사/)) {
                 html += '<div class="section"><h2 class="section-title">학력사항</h2>';
-                const eduSection = text.match(/\[학력사항\]([\s\S]*?)(?=\[경력사항\]|\[|$)/);
-                if (eduSection) {
-                    const eduText = eduSection[1].trim();
-                    const school = eduText.match(/\[학교\][:\s]*([^\n]+)/);
-                    const period = eduText.match(/\[기간\][:\s]*([^\n]+)/);
-                    const gpa = eduText.match(/\[학점\][:\s]*([^\n]+)/);
+                const eduMatch = text.match(/\[학력사항\]([\s\S]*?)(?=\[경력사항\]|\[자격증\]|\[기술\]|$)/);
+                
+                if (eduMatch) {
+                    const eduText = eduMatch[1].trim();
                     
-                    html += '<div class="education-item">';
-                    if (school) html += `<div class="school-name">${school[1].trim()}</div>`;
-                    html += '<div class="education-details">';
-                    if (period) html += `${period[1].trim()}`;
-                    if (gpa) html += ` • 학점: ${gpa[1].trim()}`;
-                    html += '</div></div>';
+                    // 여러 학력 항목 파싱
+                    const schools = eduText.split(/(?=\[학교\])/);
+                    schools.forEach(school => {
+                        if (!school.trim()) return;
+                        
+                        const schoolName = school.match(/\[학교\][:\s]*([^\n]+)/);
+                        const period = school.match(/\[기간\][:\s]*([^\n]+)/);
+                        const major = school.match(/\[전공\][:\s]*([^\n]+)/);
+                        const gpa = school.match(/\[학점\][:\s]*([^\n]+)/);
+                        
+                        if (schoolName) {
+                            html += '<div class="education-item">';
+                            html += `<div class="school-name">${schoolName[1].trim()}</div>`;
+                            html += '<div class="education-details">';
+                            if (period) html += `${period[1].trim()}`;
+                            if (major) html += ` • ${major[1].trim()}`;
+                            if (gpa) html += ` • 학점: ${gpa[1].trim()}`;
+                            html += '</div></div>';
+                        }
+                    });
+                } else {
+                    // 구조화되지 않은 학력 정보 처리
+                    const eduLines = text.split('\n').filter(line => 
+                        line.match(/학력|대학|학사|석사|박사|졸업/) && 
+                        !line.match(/\[경력사항\]/)
+                    );
+                    
+                    if (eduLines.length > 0) {
+                        html += '<div class="education-item">';
+                        html += '<div class="education-details">';
+                        eduLines.forEach(line => {
+                            html += `${line.trim()}<br>`;
+                        });
+                        html += '</div></div>';
+                    }
                 }
                 html += '</div>';
             }
             
             // 경력사항
-            if (text.includes('[경력사항]')) {
-                const careerSection = text.match(/\[경력사항\]([\s\S]*?)(?=$)/);
-                let totalExperience = '';
+            if (text.includes('[경력사항]') || text.match(/회사명|기간|직책/)) {
+                html += '<div class="section"><h2 class="section-title">경력사항</h2>';
                 
-                if (careerSection) {
-                    // 총 근무 연차 계산
-                    totalExperience = calculateTotalExperience(careerSection[1]);
-                }
-                
-                html += `<div class="section"><h2 class="section-title">경력사항 <span class="total-experience">${totalExperience}</span></h2>`;
-                
-                if (careerSection) {
-                    const companies = careerSection[1].split(/(?=\[회사명\])/);
+                const careerMatch = text.match(/\[경력사항\]([\s\S]*?)$/);
+                if (careerMatch) {
+                    const companies = careerMatch[1].split(/(?=\[회사명\])/);
                     
                     companies.forEach(company => {
                         if (!company.trim()) return;
@@ -3319,16 +3351,82 @@
                             html += '</div>';
                             if (position) html += `<div class="position">${position[1].trim()}</div>`;
                             
-                            // 나머지 내용
-                            let content = company
-                                .replace(/\[회사명\][:\s]*[^\n]+/, '')
-                                .replace(/\[기간\][:\s]*[^\n]+/, '')
-                                .replace(/\[직책\][:\s]*[^\n]+/, '')
-                                .trim();
-                            
-                            if (content) {
-                                html += `<div class="content">${content}</div>`;
+                            // 담당 업무
+                            const dutyMatch = company.match(/\[담당 업무\]([\s\S]*?)(?=\[주요 성과\]|\[활용 기술\]|$)/);
+                            if (dutyMatch) {
+                                html += '<div class="subsection">';
+                                html += '<div class="subsection-title">🎯 담당 업무</div>';
+                                html += '<div class="subsection-content">';
+                                
+                                const dutyText = dutyMatch[1].trim();
+                                
+                                // 프로젝트 제목
+                                const projectTitle = dutyText.match(/^([^\n]+)/);
+                                if (projectTitle) {
+                                    html += `<p><strong>${projectTitle[1].trim()}</strong></p>`;
+                                }
+                                
+                                // Situation/Task/Action/Result 파싱
+                                const situation = dutyText.match(/(?:•\s*)?Situation[:\s]*([^\n]+(?:\n(?!•)[^\n]+)*)/);
+                                const task = dutyText.match(/(?:•\s*)?Task[:\s]*([^\n]+(?:\n(?!•)[^\n]+)*)/);
+                                const action = dutyText.match(/(?:•\s*)?Action[:\s]*([^\n]+(?:\n(?!•)[^\n]+)*)/);
+                                const result = dutyText.match(/(?:•\s*)?Result[:\s]*([^\n]+(?:\n(?!•)[^\n]+)*)/);
+                                
+                                if (situation || task || action || result) {
+                                    html += '<ul>';
+                                    if (situation) html += `<li><span class="star-label">Situation:</span> ${situation[1].trim()}</li>`;
+                                    if (task) html += `<li><span class="star-label">Task:</span> ${task[1].trim()}</li>`;
+                                    if (action) html += `<li><span class="star-label">Action:</span> ${action[1].trim()}</li>`;
+                                    if (result) html += `<li><span class="star-label">Result:</span> ${result[1].trim()}</li>`;
+                                    html += '</ul>';
+                                } else {
+                                    // STAR 형식이 아닌 경우 일반 리스트로
+                                    const lines = dutyText.split('\n').slice(1); // 첫 줄(제목) 제외
+                                    if (lines.length > 0) {
+                                        html += '<ul>';
+                                        lines.forEach(line => {
+                                            const cleaned = line.replace(/^[•\-\*]\s*/, '').trim();
+                                            if (cleaned) html += `<li>${cleaned}</li>`;
+                                        });
+                                        html += '</ul>';
+                                    }
+                                }
+                                
+                                html += '</div></div>';
                             }
+                            
+                            // 주요 성과
+                            const achievementMatch = company.match(/\[주요 성과\]([\s\S]*?)(?=\[활용 기술\]|$)/);
+                            if (achievementMatch) {
+                                html += '<div class="subsection">';
+                                html += '<div class="subsection-title">📊 주요 성과</div>';
+                                html += '<div class="subsection-content"><ul>';
+                                
+                                const achievements = achievementMatch[1].trim().split('\n');
+                                achievements.forEach(achievement => {
+                                    const cleaned = achievement.replace(/^[•\-\*]\s*/, '').trim();
+                                    if (cleaned) html += `<li>${cleaned}</li>`;
+                                });
+                                
+                                html += '</ul></div></div>';
+                            }
+                            
+                            // 활용 기술 & 방법론
+                            const techMatch = company.match(/\[활용 기술.*?\]([\s\S]*?)(?=$)/);
+                            if (techMatch) {
+                                html += '<div class="subsection">';
+                                html += '<div class="subsection-title">🔧 활용 기술 & 방법론</div>';
+                                html += '<div class="subsection-content"><ul>';
+                                
+                                const techs = techMatch[1].trim().split('\n');
+                                techs.forEach(tech => {
+                                    const cleaned = tech.replace(/^[•\-\*]\s*/, '').trim();
+                                    if (cleaned) html += `<li>${cleaned}</li>`;
+                                });
+                                
+                                html += '</ul></div></div>';
+                            }
+                            
                             html += '</div>';
                         }
                     });
@@ -3366,44 +3464,40 @@
             // 1. HTML 생성
             generatedHTML = generateMinimalProfessionalHTML(careerText, profilePhotoData);
             
-            // 2. 미리보기 탭 업데이트
-            updatePreviewTab(generatedHTML);
+            // 2. 회사 수 계산 및 표시
+            const companyCount = countCompanies(careerText);
+            document.getElementById('companyCount').textContent = companyCount;
             
             // 3. 텍스트 편집기 업데이트
             document.getElementById('textEditor').value = careerText;
             
-            // 4. HTML 탭 업데이트
-            updateHTMLTab(generatedHTML);
-            
-            // 5. 편집 버튼 상태 초기화
+            // 4. 편집 버튼 상태 초기화
             updateEditorButtons();
         }
         
-        // 미리보기 탭 업데이트
-        function updatePreviewTab(htmlContent) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlContent, 'text/html');
-            const container = doc.querySelector('.container');
+        // 회사 수 계산
+        function countCompanies(text) {
+            // 간단한 방법: 회사명 패턴 찾기
+            // 예: [회사명], (주) 회사명, 회사명 (Company) 등
+            const lines = text.split('\n');
+            let count = 0;
             
-            if (container) {
-                document.getElementById('previewTab').innerHTML = 
-                    '<div class="preview-container" style="background: #fff; padding: 40px; border: 1px solid #e0e0e0; max-height: 600px; overflow-y: auto;">' +
-                    container.innerHTML +
-                    '</div>';
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                // 회사 섹션 시작 패턴 감지
+                if (line.match(/^\[.+\]$/) || // [회사명]
+                    line.match(/^[\(（]주[\)）]/) || // (주)회사명
+                    line.match(/^\d{4}\.\d{2}.*~.*\d{4}\.\d{2}/) || // 날짜 범위
+                    line.match(/^[가-힣a-zA-Z\s&\(\)]+\s*\(/)) { // 회사명 (...)
+                    count++;
+                }
             }
+            
+            // 최소 1개 보장
+            return count > 0 ? count : 1;
         }
         
-        // HTML 탭 업데이트
-        function updateHTMLTab(htmlContent) {
-            const escaped = htmlContent
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-            
-            document.getElementById('htmlTab').innerHTML = 
-                '<div class="code-container"><pre>' + escaped + '</pre></div>';
-        }
+        // 미리보기 탭 업데이트
         
         // 편집기 버튼 상태 업데이트
         function updateEditorButtons() {
@@ -3443,19 +3537,12 @@
             // HTML 재생성
             generatedHTML = generateMinimalProfessionalHTML(editedText, profilePhotoData);
             
-            // 미리보기 및 HTML 탭 업데이트
-            updatePreviewTab(generatedHTML);
-            updateHTMLTab(generatedHTML);
-            
             // 편집 횟수 증가
             editCount++;
             updateEditorButtons();
             
             // 성공 메시지
-            alert('✅ 수정 내용이 HTML에 반영되었습니다!\n미리보기 탭과 HTML 탭에서 확인하세요.');
-            
-            // 미리보기 탭으로 자동 전환
-            switchResultTab('preview');
+            alert('✅ 수정 내용이 HTML에 반영되었습니다!\n이제 HTML을 다운로드할 수 있습니다.');
         }
         
         // 텍스트 되돌리기
