@@ -3138,56 +3138,6 @@
 </body>
 </html>`;
         }
-                padding: 40px 20px;
-            }
-            .header {
-                flex-direction: column;
-            }
-            .profile-photo {
-                width: 150px;
-                margin: 0 auto;
-            }
-            .contact-info {
-                grid-template-columns: 1fr;
-            }
-            .section-title {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-            .total-experience {
-                font-size: 14px;
-            }
-            .content {
-                padding-left: 12px;
-                margin-left: 4px;
-            }
-            .content h4 {
-                margin-left: -12px;
-                padding-left: 12px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="profile-photo">
-                ${photoHTML}
-            </div>
-            <div class="header-info">
-                <div class="name">${extractName(careerText)}</div>
-                <div class="contact-info">
-                    ${extractContactInfo(careerText)}
-                </div>
-            </div>
-        </div>
-        
-        ${parseCareerSections(careerText)}
-    </div>
-</body>
-</html>`;
-        }
         
         // 이름 추출
         function extractName(text) {
